@@ -1,0 +1,31 @@
+# Python
+backend/venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Environment variables
+backend/.env
+
+# AI files
+ai/faiss_index/
+ai/embeddings/
+*.npy
+*.pkl
+*.pt
+*.pth
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
