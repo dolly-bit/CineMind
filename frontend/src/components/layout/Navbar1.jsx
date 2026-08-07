@@ -74,8 +74,7 @@ export default function Navbar() {
         {/* Right Side */}
         <div className="flex items-center gap-3">
 
-         
-           {!isAuthenticated ? (
+          
             <>
               <button
                 onClick={() => navigate("/login")}
@@ -91,16 +90,7 @@ export default function Navbar() {
                 Sign Up
               </button>
             </>
-          ) : (
-            <button
-              onClick={logout}
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-red-600 hover:bg-red-700 transition"
-            >
-              <LogOut size={16} />
-              Logout
-            </button>
-          )}
-         
+          )
 
         </div>
 

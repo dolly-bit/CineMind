@@ -10,6 +10,7 @@ from app.routes.recommend import router as recommend_router
 from app.routes.watch_history import router as watch_history_router
 from app.routes.search_history import router as search_history_router
 
+
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(

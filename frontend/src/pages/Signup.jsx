@@ -1,11 +1,12 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Film, Sparkles, Play, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import api from "../services/api";
 
 export default function Signup() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [form, setForm] = useState({
     username: "",
@@ -16,6 +17,7 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [formKey, setFormKey] = useState(0);
 
   const handleChange = (e) => {
     setForm({
@@ -27,6 +29,13 @@ export default function Signup() {
   const resetForm = () => {
     setForm({ username: "", email: "", password: "" });
   };
+
+  useEffect(() => {
+    resetForm();
+    setShowPassword(false);
+    setError("");
+    setFormKey((prev) => prev + 1);
+  }, [location.pathname, location.key]);
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -77,7 +86,7 @@ export default function Signup() {
         <div className="mb-8 max-w-xl text-center lg:mb-0 lg:text-left">
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-purple-500/40 bg-purple-500/10 px-4 py-2 text-sm font-medium text-purple-200">
             <Film size={16} />
-            CineMind AI
+            DeepCine : Your Personal Movie Assistant
           </div>
 
           <h1 className="text-4xl font-black leading-tight sm:text-5xl">
@@ -110,11 +119,12 @@ export default function Signup() {
             </div>
           )}
 
-          <form onSubmit={handleSignup} className="mt-6 space-y-4">
+          <form key={formKey} onSubmit={handleSignup} className="mt-6 space-y-4">
             <input
               type="text"
               name="username"
               placeholder="Username"
+               autoComplete="off"
               value={form.username}
               onChange={handleChange}
               className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-purple-500 focus:bg-white/10"
@@ -123,6 +133,7 @@ export default function Signup() {
             <input
               type="email"
               name="email"
+               autoComplete="off"
               placeholder="Email"
               value={form.email}
               onChange={handleChange}
@@ -134,6 +145,7 @@ export default function Signup() {
                 type={showPassword ? "text" : "password"}
                 name="password"
                 placeholder="Password"
+                autoComplete="new-password"
                 value={form.password}
                 onChange={handleChange}
                 className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 pr-12 text-white outline-none transition focus:border-purple-500 focus:bg-white/10"
