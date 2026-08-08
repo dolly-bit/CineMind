@@ -1,7 +1,6 @@
 import faiss
 import numpy as np
 from pathlib import Path
-from sentence_transformers import SentenceTransformer
 
 from app.database.connection import SessionLocal
 from app.models.movie import Movie
@@ -26,6 +25,7 @@ def get_model():
     global model
 
     if model is None:
+        from sentence_transformers import SentenceTransformer
         model = SentenceTransformer("all-MiniLM-L6-v2")
 
     return model
