@@ -24,7 +24,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "https://deepcine.onrender.com",
-        "https://cine-mind-ai.vercel.app"
+        "https://deep-cine.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
