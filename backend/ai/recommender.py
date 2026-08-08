@@ -1,35 +1,37 @@
 import faiss
 import numpy as np
+from pathlib import Path
 from sentence_transformers import SentenceTransformer
 
 from app.database.connection import SessionLocal
 from app.models.movie import Movie
-from pathlib import Path
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load lightweight FAISS data at startup
+index = faiss.read_index(
+    str(BASE_DIR / "movie_index.faiss")
+)
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
-index = faiss.read_index(str(BASE_DIR / "movie_index.faiss"))
-movie_ids = np.load(str(BASE_DIR / "movie_ids.npy"))
+movie_ids = np.load(
+    str(BASE_DIR / "movie_ids.npy")
+)
+
+# Don't load the ML model at startup
+model = None
 
 
-def load_recommender():
-    global model, index, movie_ids
+def get_model():
+    global model
 
     if model is None:
         model = SentenceTransformer("all-MiniLM-L6-v2")
 
-    if index is None:
-        index = faiss.read_index(str(BASE_DIR / "movie_index.faiss"))
-
-    if movie_ids is None:
-        movie_ids = np.load("movie_ids.npy")
+    return model
 
 
 def recommend_movies(movie_name: str, top_k: int = 10):
-
-    load_recommender()
 
     db = SessionLocal()
 
@@ -49,9 +51,17 @@ def recommend_movies(movie_name: str, top_k: int = 10):
         Language: {movie.original_language or ""}
         """
 
-        embedding = model.encode([text]).astype("float32")
+        # Load SentenceTransformer only when recommendation is requested
+        embedding_model = get_model()
 
-        _, indices = index.search(embedding, top_k + 1)
+        embedding = embedding_model.encode(
+            [text]
+        ).astype("float32")
+
+        _, indices = index.search(
+            embedding,
+            top_k + 1
+        )
 
         recommendations = []
 
