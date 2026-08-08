@@ -1,5 +1,6 @@
 import faiss
 import numpy as np
+from sentence_transformers import SentenceTransformer
 from pathlib import Path
 
 from app.database.connection import SessionLocal
@@ -8,7 +9,10 @@ from app.models.movie import Movie
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load lightweight FAISS data at startup
+# Lazy-load the ML model
+model = None
+
+# Load FAISS index and movie IDs
 index = faiss.read_index(
     str(BASE_DIR / "movie_index.faiss")
 )
@@ -17,15 +21,11 @@ movie_ids = np.load(
     str(BASE_DIR / "movie_ids.npy")
 )
 
-# Don't load the ML model at startup
-model = None
-
 
 def get_model():
     global model
 
     if model is None:
-        from sentence_transformers import SentenceTransformer
         model = SentenceTransformer("all-MiniLM-L6-v2")
 
     return model
@@ -51,10 +51,10 @@ def recommend_movies(movie_name: str, top_k: int = 10):
         Language: {movie.original_language or ""}
         """
 
-        # Load SentenceTransformer only when recommendation is requested
-        embedding_model = get_model()
+        # Load model only when recommendation is requested
+        model_instance = get_model()
 
-        embedding = embedding_model.encode(
+        embedding = model_instance.encode(
             [text]
         ).astype("float32")
 
@@ -66,6 +66,9 @@ def recommend_movies(movie_name: str, top_k: int = 10):
         recommendations = []
 
         for idx in indices[0]:
+
+            if idx < 0 or idx >= len(movie_ids):
+                continue
 
             movie_id = int(movie_ids[idx])
 
@@ -83,7 +86,8 @@ def recommend_movies(movie_name: str, top_k: int = 10):
                     "id": rec_movie.id,
                     "title": rec_movie.title,
                     "poster_url": (
-                        f"https://image.tmdb.org/t/p/w500{rec_movie.poster_path}"
+                        f"https://image.tmdb.org/t/p/w500"
+                        f"{rec_movie.poster_path}"
                         if rec_movie.poster_path
                         else None
                     ),
